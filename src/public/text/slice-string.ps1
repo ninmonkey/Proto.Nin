@@ -61,16 +61,110 @@ maybe length is optional parameter besides slicing?
     from 3 to 5
         slice 3:5
         slice x:y
-
-
 #>
 
-function TruncateString {
-    # $str.ToCharArray(  ($str.length - 10), 10) -join ''
+# register metadata command in ninmonkey.console
+if ($false) {
+    Export-ModuleMember -Function @(
+        'Format-TruncateString'
+        'Pipe-TruncateString'
+    ) -Alias @(
+
+    ) -Variable @(
+
+    )
+}
+
+function Format-TruncateString {
+    <#
+    .synopsis
+        sugar to grab X chars without out of bounds --> SubStr( start, count )
+
+    .NOTES
+        no performance testing
+    .link
+        Proto.Nin\Format-TruncateString
+    .link
+        Proto.Nin\Pipe-TruncateString
+    #>
+    [CmdletBinding(DefaultParameterSetName = 'FromStart')]
+    param(
+        # Source
+        [Parameter(Mandatory, Position = 0)]
+        [Alias('Text')]
+        [string]$InputObject,
+
+        # FirstN chars (chars, not codepoints/runes)
+        # You may pass a negative value (which switches to -Last N)
+        [Parameter(
+            Mandatory, Position = 1, ParameterSetName = 'FromStart')]
+        [int]$First,
+
+        # LanstN chars (chars, not codepoints/runes)
+        [Parameter(
+            Mandatory, Position = 1, ParameterSetName = 'FromEnd')]
+        [int]$Last
+    )
+
+    # $UserLen = $First ?? $Last
+
+
+    # $StartIndex = 0
+    # $MaxSubStrLength = $MaxLen - $StartIndex
+    # $SubStrLength = [math]::min( $UserLen, $MaxSubStrLength )
+    $ResolvedParamSetName = $PSCmdlet.ParameterSetName
+    if ($First -lt 0) {
+        $ResolvedParamSetName = 'fromEnd'
+        $Last = $First * -1
+    }
+
+
+    switch ($ResolvedParamSetName) {
+        'fromStart' {
+            # first N is:
+            #   $str.ToCharArray( 0, (bounded10) )
+            [string]$Target = $InputObject
+            [int]$MaxLen = $Target.Length
+            [int]$StartIndex = 0
+            [int]$SubStrLength = 0 + $First
+            [int]$BoundedStrLength = [Math]::Min( $SubStrLength, $MaxLen)
+            $chars = $Target.ToCharArray($StartIndex, $BoundedStrLength)
+            return $chars -join ''
+        }
+        'fromEnd' {
+            # last N is:
+            #   $str.ToCharArray(  ($str.length - 10), 10) -join ''
+            [string]$Target = $InputObject
+            [int]$MaxLen = $Target.Length
+            [int]$BoundedStrLength = [Math]::Min( $Last, $MaxLen )
+            [int]$StartIndex = $MaxLen - $BoundedStrLength
+            $chars = $Target.ToCharArray($StartIndex, $BoundedStrLength)
+            return $chars -join ''
+        }
+        default {
+            throw "Unhandled ParameterSet: $($PSCmdlet.ParameterSetName)"
+        }
+    }
+}
+
+
+function Pipe-TruncateString {
+
+    <#
+    .synopsis
+        wraps to allow optional pipeline with simpler parameters, maybe expose only one
+    .NOTES
+        no performance testing
+    .link
+        Proto.Nin\Format-TruncateString
+    .link
+        Proto.Nin\Pipe-TruncateString
+    #>
     [CmdletBinding(DefaultParameterSetName = 'FromStart')]
     param(
         # Source
         [Alias('Text')]
+        [Parameter(Mandatory, ValueFromPipeline)]
         [string]$InputObject,
 
         # FirstN chars (chars, not codepoints/runes)
@@ -83,33 +177,11 @@ function TruncateString {
             Mandatory, Position = 0, ParameterSetName = 'FromEnd')]
         [int]$Last
     )
-
-    $UserLen = $First ?? $Last
-    $MaxLen = $InputObject.Count
-
-
-    $StartIndex = 0
-    $MaxSubStrLength = $MaxLen - $StartIndex
-    $SubStrLength = [math]::min( $UserLen, $MaxSubStrLength )
-
-    $StartIndex =
-    switch ($PSCmdlet.ParameterSetName) {
-        'fromStart' {
-            $StartIndex = 0
-            $SubStrLength = 0 + $First
-            $SubStrLength = [int]::Min( $SubStrLength, $MaxSubStrLength)
-            $chars = $InputObject.GetChar($StartIndex, $SubStrLength)
-            return $chars -join ''
-        }
-        'fromEnd' {
-            $StartIndex = 'x'
-        }
-        default {
-            throw "Unhandled ParameterSet: $($PSCmdlet.ParameterSetName)"
-        }
+    process {
+        Format-TruncateString -InputObject $InputObject @PSBoundParameters
     }
+
 }
 
+'hi'
 
-$Sample = 'MethodInvocationException: Exception calling "ToCharArray" with "2" argument(s): "Index was out of range. Must be non-negative and less than the size of the collection. (Parameter '
-# TruncateString 'a '
