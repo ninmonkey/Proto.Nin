@@ -5,5 +5,36 @@
             "path": "."
         }
     ],
-    "settings": {}
+    "settings": {
+        /*
+            more:
+                "testing.*"
+                "testExplorer.*"
+        */
+        // "testExplorer.onStart": "reset",
+        // "testExplorer.*"
+        // "powershell.debugging.createTemporaryIntegratedConsole": false
+        // "powershell.powerShellDefaultVersion": ,
+        // "powershell.developer.featureFlags": [],
+        "testing.autoRun.delay": 1000,
+        "testExplorer.sort": "byLabelWithSuitesFirst",
+        "testExplorer.onReload": null,
+        "testExplorer.mergeSuites": true, // not sure
+        "testExplorer.hideWhen": "noTests",
+        "testExplorer.gutterDecoration": true,
+        "testExplorer.errorDecorationHover": true,
+        "testExplorer.errorDecoration": true, // def: true
+        "testExplorer.errorDecoration": false, // def: true
+        "testExplorer.codeLens": true,
+        "testExplorer.addToEditorContextMenu": true,
+        "testExplorer.showExpandButton": 3,
+        "powershell.scriptAnalysis.settingsPath": "PSScriptAnalyzerSettings.psd1",
+        "powershell.scriptAnalysis.enable": true,
+        "powershell.pester.outputVerbosity": "Detailed",
+        "powershell.developer.editorServicesWaitForDebugger": false,
+        "powershell.developer.editorServicesLogLevel": "Warning",
+        "pester.runTestsInNewProcess": false,
+        "pester.autoRunOnSave": true,
+        "pester.autoDebugOnSave": false,
+    }
 }
