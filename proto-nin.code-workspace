@@ -16,6 +16,7 @@
         // "powershell.debugging.createTemporaryIntegratedConsole": false
         // "powershell.powerShellDefaultVersion": ,
         // "powershell.developer.featureFlags": [],
+        "powershell.startAutomatically": true,
         "testing.autoRun.delay": 1000,
         "testExplorer.sort": "byLabelWithSuitesFirst",
         "testExplorer.onReload": null,
