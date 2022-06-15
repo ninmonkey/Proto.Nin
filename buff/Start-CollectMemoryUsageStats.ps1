@@ -1,4 +1,4 @@
-$AppConfig = @{
+$script:__memAppConfig = @{
     Root = 'C:\Users\cppmo_000\SkyDrive\Documents\2022\Power-BI\buffer_excel\2022-06\memory-usage-pwsh'
 }
 
@@ -25,7 +25,7 @@ function Get-CurrentLogPath {
     #New-LogName {
     $Date = (Get-Date).ToString('u') -split '\s+' | Select-Object -First 1
     $Base = "export-usage_${Date}-${Label}.${Extension}"
-    $Full = Join-Path $AppConfig.ExportRoot $Base
+    $Full = Join-Path $script:__memAppConfig.ExportRoot $Base
     if (-not (Test-Path $Full)) {
 
         Write-Debug "CreatingLogFile: '$Full'"
@@ -37,8 +37,8 @@ function Get-CurrentLogPath {
 }
 $script:__shared = @{}
 
-$AppConfig += @{
-    ExportRoot        = Get-Item -ea stop (Join-Path $AppConfig.Root '.logs')
+$script:__memAppConfig += @{
+    ExportRoot        = Get-Item -ea stop (Join-Path $script:__memAppConfig.Root '.logs')
     StartedAsAdmin    = Test-UserIsAdmin
     DebugSuperVerbose = $false
     DelayDurationMs   = 5000
@@ -68,11 +68,11 @@ function _processRecord {
             UserProcessorTime          = $Target.UserProcessorTime
             TotalProcessorTime         = $Target.TotalProcessorTime
             StartTime                  = $Target.StartTime
-            StartedAsAdmin             = $AppConfig.StartedAsAdmin
+            StartedAsAdmin             = $script:__memAppConfig.StartedAsAdmin
             PrivilegedProcessorTime    = $Target.PrivilegedProcessorTime
-            Pid                        = $Target.Pid
-            ParentPid                  = $Target.ParentPid
-            Parent                     = $Target.Parent.Id
+            Pid                        = $Target.Id
+            ParentPid                  = $Target.Parent.id
+            ParentName                 = $Target.Parent.Name
             Now                        = $now
             Name                       = $Target.Name
             EndTime                    = $Target.EndTime
@@ -99,7 +99,8 @@ function _processRecord {
     foreach ($Key in $data.psobject.properties.name) {
         $value = $Data.$Key
         try {
-            Write-Debug "Serialize: ${Key}.${Value} ?"
+            Writ
+            e-Debug "Serialize: ${Key}.${Value} ?"
             if ($null -eq $Value) {
                 Write-Debug "`tno, was [`u{2400}]."
                 continue
@@ -144,7 +145,7 @@ function _collectSample {
     $script:__shared['Now'] = [datetime]::Now
     $sample = Get-Process | ForEach-Object {
 
-        if ($AppConfig.DebugSuperVerbose) {
+        if ($script:__memAppConfig.DebugSuperVerbose) {
             $procSplat = @{
                 ErrorAction = 'break'
                 Debug       = $true
@@ -268,24 +269,27 @@ function Start-CollectLoop {
     }
     while ($true) {
         # [console]::Write('.')
-        Label 'Sleep (ms)' $AppConfig.DelayDurationMs
+        Label 'Sleep (ms)' $script:__memAppConfig.DelayDurationMs
         Get-ChildItem .\.logs\ -Recurse -Force # | Sort Length
         Invoke-CollectAllTypes -infa 'continue' -Options $Options
 
-        Start-Sleep -Milliseconds $AppConfig.DelayDurationMs
+
+        Start-Sleep -Milliseconds $script:__memAppConfig.DelayDurationMs
 
     }
 }
 
-Goto $AppConfig.Root
+Goto $script:__memAppConfig.Root
 Label 'Call' 'Start-CollectLoop()'
 
-Start-CollectLoop
+if ($false) {
+    Start-CollectLoop
+}
 
 if ($false) {
 
 
-    if (-not $AppConfig.DebugSuperVerbose) {
+    if (-not $script:__memAppConfig.DebugSuperVerbose) {
         Invoke-CollectAllTypes -infa 'continue'# -ea break
 
         Get-ChildItem .\.logs\ -Recurse -Force # | Sort Length
