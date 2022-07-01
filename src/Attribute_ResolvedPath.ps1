@@ -1,11 +1,22 @@
-# intro on custom attributes:
-#     https://powershellexplained.com/2017-02-19-Powershell-custom-attribute-validator-transform/
-#     https://powershellexplained.com/2017-02-20-Powershell-creating-parameter-validators-and-transforms/
+<#
+intro on custom attributes:
+- https://powershellexplained.com/2017-02-19-Powershell-custom-attribute-validator-transform/
+- https://powershellexplained.com/2017-02-20-Powershell-creating-parameter-validators-and-transforms/
 
-class ResolvedFilepath : Attribute {
+- https://docs.microsoft.com/en-us/dotnet/standard/attributes/writing-custom-attributes#custom-attribute-example
+
+
+cs: <https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/generics/generics-and-attributes>
+        public class GenericClass2<T, U> { }
+
+        [CustomAttribute(info = typeof(GenericClass2<,>))]
+        class ClassB { }
+
+#>
+class ResolvedFileInfo : Attribute {
     <#
     .synopsis
-        ensures the path exists, else error
+        ensures an [IO.FileInfo] object, even if file does not exist. optionally create it.
     .DESCRIPTION
         I could always return a [FileInfo]
 
@@ -18,24 +29,31 @@ class ResolvedFilepath : Attribute {
     [string]$Path = [string]::Empty
 
     # if false, create filepath
+    [bool]$CreateMissing
     [bool]$ErrorIfMissing
+    # [bool]$ErrorIfMissing
 }
 
 
 
 function testIt {
+    [cmdletbinding()]
+    [outputtype('System.IO.FileInfo')]
     param(
-        [ResolvedFilepath()]
+        [ResolvedFileInfo(CreateMissing)]
         [Parameter()]
-        $AllowCreatePath,
+        $AlwaysCreatePath,
 
-        [ResolvedFilepath(ErrorIfMissing)]
+        [ResolvedFileInfo()]
         [Parameter()]
         $ErrorIfMissingPath
     )
     [pscustomobject]@{
-        AllowCreatePath    = $AllowCreatePath
-        ErrorIfMissingPath = $ErrorIfMissingPath
+        CreateMissing  = '?'
+        ErrorIfMissing = '?'
+        Path           = '?'
+        # AllowCreatePath    = '?' #$AllowCreatePath
+        # ErrorIfMissingPath = '?' #$ErrorIfMissingPath
     }
 }
 
