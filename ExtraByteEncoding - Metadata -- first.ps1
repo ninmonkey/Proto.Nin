@@ -57,7 +57,18 @@ Instead:
 
 '
 class EncodedTextResult {
+    <#
+    see more
+
+    -
+    - Base Class Constructors: https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_classes?view=powershell-7#calling-base-class-constructors
+    - Implementing IComparable https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_classes?view=powershell-7#inheriting-from-interfaces
+
+    #>
+
+
     # not written to be performant, but useful
+
     [ValidateNotNull()][string]$RawOriginal = [String]::Empty
     [byte[]]$EncodedText = @()
     [string]$EncodingName = 'utf-8' # should be a Encoder getter
@@ -72,11 +83,31 @@ class EncodedTextResult {
     # [bool]$WasTrueNull # should never reach
     [bool]$WasBlank
     [bool]$WasWhiteSpace
+
+    [int]$ByteCount
     # [bool]$WasControlChars // regex Cc?
+
+    [int]$ByteCount_AsUtf8
+    [int]$ByteCount_AsUnicode
+    [int]$ByteCount_Ascii
+
+    [byte[]]$EncodedText_AsUtf8
+    [byte[]]$EncodedText_AsUnicode
+    [byte[]]$EncodedText_AsAscii
+
 
     # future: make encoding optional
     # EncodedTextResult ( [string]$InputString, [String]$EncodingName ) {
+
     EncodedTextResult ( [string]$InputString, [object]$Encoding ) {
+        newEncoding utf-8
+        newEncoding unicode
+        newEncoding ascii
+
+        [int]$ByteCount_AsUtf8
+        [int]$ByteCount_AsUnicode
+        [int]$ByteCount_Ascii
+
         if ($null -eq $InputString) {
             throw 'Required string was missing'
         }
@@ -107,23 +138,19 @@ class EncodedTextResult {
         $this.EncodingName = $this.Encoder.WebName
 
         $this.EncodedText = $this.Encoder.GetBytes( $InputString )
-        $this.EncodedText = $this.Encoder.GetByteCount( $InputString )
+        $this.ByteCount = $this.Encoder.GetByteCount( $InputString )
         # $this.EncodedText = $this.Encoder.GetMaxCharCount()
 
         # this.Encoding als has these
         # $this.Encoder_MaxByteCount = $this.Encoder.GetMaxByteCount()
     }
-
-
-
 }
-$results1 = @(
-    # [EncodedTextResult]::new(' ')
-    [EncodedTextResult]::new('ds Hi')
-)
-$results1
-$results1.count | Label 'count'
 
+<#
+Pester test
+    validate .Length and .ToArrays.count are equal
+
+#>
 
 $Samples = @{
     Family3  = '👨‍👧‍👶'
@@ -131,16 +158,8 @@ $Samples = @{
     Newlines = "line1`n`nline3`ttab"
     Ascii    = 'Hi world', @(0..127 | ForEach-Object { [char]$_ } | Join-String -sep '.') | Join-String -sep ';'
 }
+$enc = newEncoding utf-8
 $enc.GetByteCount( $Samples.Family3 )
-$enc.GetByteCount( $Samples.Newlines )
-
-$results1 = @(
-    # [EncodedTextResult]::new(' ')
-    [EncodedTextResult]::new('ds Hi')
-    [EncodedTextResult]::new( $Samples.Newlines )
-)
-$results1
-$results1.count | Label 'count $results2'
 
 hr
 $newEnc = newEncoding unicode
@@ -150,8 +169,8 @@ $results = $Samples.Values | ForEach-Object {
     [EncodedTextResult]::new( $cur, $newEnc )
 }
 
+$results
 $results.count | Label 'count $results'
-
 
 return
 
