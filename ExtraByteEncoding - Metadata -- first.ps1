@@ -1,5 +1,7 @@
 Using namespace System.Collections.Generic
 using namespace System.Text
+#Requires -Version 7
+
 
 
 
@@ -55,7 +57,11 @@ Instead:
 
 '
 class EncodedTextResult {
+    # not written to be performant, but useful
     [ValidateNotNull()][string]$RawOriginal = [String]::Empty
+    [byte[]]$EncodedText = @()
+    [string]$EncodingName = 'utf-8' # should be a Encoder getter
+    [Text.Encoding]$Encoder
 
     # alias HighlightedDisplayString
     [ValidateNotNull()][string]$HighlightedDisplayString = [String]::Empty
@@ -68,13 +74,21 @@ class EncodedTextResult {
     [bool]$WasWhiteSpace
     # [bool]$WasControlChars // regex Cc?
 
-
-    EncodedTextResult ( [string]$InputString ) {
+    # future: make encoding optional
+    # EncodedTextResult ( [string]$InputString, [String]$EncodingName ) {
+    EncodedTextResult ( [string]$InputString, [object]$Encoding ) {
         if ($null -eq $InputString) {
             throw 'Required string was missing'
         }
         if ($InputString.length -eq 0) {
             throw 'String is empty!'
+        }
+        if ($Encoding -is 'System.Text.Encoding') {
+            $this.Encoder = $Encoding
+            Write-Debug "As Encoder: $Encoding"
+        } else {
+            $this.Encoder = newEncoding $Encoding
+            Write-Debug "As String -> NewEncoding: $Encoding"
         }
 
         $r = 255 * .8
@@ -88,21 +102,59 @@ class EncodedTextResult {
         ) -join ''
         $this.WasBlank = [string]::IsNullOrEmpty( $InputString )
         $this.WasWhiteSpace = [string]::IsNullOrWhiteSpace( $InputString )
-        $this.WasWhiteSpace = [string]::IsNullOrWhiteSpace( $InputString )
         $this.ControlCharDisplayString = $InputString | Format-ControlChar
+
+        $this.EncodingName = $this.Encoder.WebName
+
+        $this.EncodedText = $this.Encoder.GetBytes( $InputString )
+        $this.EncodedText = $this.Encoder.GetByteCount( $InputString )
+        # $this.EncodedText = $this.Encoder.GetMaxCharCount()
+
+        # this.Encoding als has these
+        # $this.Encoder_MaxByteCount = $this.Encoder.GetMaxByteCount()
     }
 
 
 
 }
-$results = @(
+$results1 = @(
     # [EncodedTextResult]::new(' ')
     [EncodedTextResult]::new('ds Hi')
 )
-$results
-$results.count | Label 'count'
+$results1
+$results1.count | Label 'count'
+
+
+$Samples = @{
+    Family3  = '👨‍👧‍👶'
+    Monkey   = '🐒'
+    Newlines = "line1`n`nline3`ttab"
+    Ascii    = 'Hi world', @(0..127 | ForEach-Object { [char]$_ } | Join-String -sep '.') | Join-String -sep ';'
+}
+$enc.GetByteCount( $Samples.Family3 )
+$enc.GetByteCount( $Samples.Newlines )
+
+$results1 = @(
+    # [EncodedTextResult]::new(' ')
+    [EncodedTextResult]::new('ds Hi')
+    [EncodedTextResult]::new( $Samples.Newlines )
+)
+$results1
+$results1.count | Label 'count $results2'
+
+hr
+$newEnc = newEncoding unicode
+$results = $Samples.Values | ForEach-Object {
+    $cur = $_
+    [EncodedTextResult]::new( $cur, 'utf-8' )
+    [EncodedTextResult]::new( $cur, $newEnc )
+}
+
+$results.count | Label 'count $results'
+
 
 return
+
 function decodeAs {
     # dEncode text from this encoding.
     [OutputType('System.Text')]
@@ -118,16 +170,6 @@ function decodeAs {
         [string]$EncodingName
     )
 }
-
-$Samples = @{
-    $Family3  = '👨‍👧‍👶'
-    $Monkey   = '🐒'
-    $Newlines = "line1`n`nline3`ttab"
-    $Ascii    = 'Hi world', @(0..127 | ForEach-Object { [char]$_ } | Join-String -sep '.') | Join-String -sep ';'
-}
-$enc.GetByteCount( $Samples.Family3 )
-$enc.GetByteCount( $Samples.Newlines )
-$enc.GetByteCount( $str )
 
 #   @{
 
