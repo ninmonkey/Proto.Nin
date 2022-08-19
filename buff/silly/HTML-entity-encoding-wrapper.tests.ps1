@@ -49,3 +49,4 @@ Describe 'HTML [en|de]code entities' {
         | Should -Not -Throw
     }
 }
+

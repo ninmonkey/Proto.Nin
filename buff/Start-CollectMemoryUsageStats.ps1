@@ -3,7 +3,7 @@ $script:__memAppConfig = @{
 }
 
 
-
+# First 2022-06-20
 function Test-UserIsAdmin {
     <#
     .synopsis
@@ -99,13 +99,12 @@ function _processRecord {
     foreach ($Key in $data.psobject.properties.name) {
         $value = $Data.$Key
         try {
-            Writ
-            e-Debug "Serialize: ${Key}.${Value} ?"
+            Write-Debug "Serialize: ${Key}.${Value} ?"
             if ($null -eq $Value) {
                 Write-Debug "`tno, was [`u{2400}]."
                 continue
             }
-            $val_tinfo = $Value.GetType()
+            # $val_tinfo = $Value.GetType()
 
             if ($Value -is 'datetime' -or $Value -is 'datetimeoffset') {
                 $Data.$Key = $Value.ToString('u')

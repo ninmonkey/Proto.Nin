@@ -1,4 +1,4 @@
-
+Write-Warning "Move all to Nancy <$PSSCommandPath>"
 function Get-RandomColor.proto {
     <#
     .synopsis

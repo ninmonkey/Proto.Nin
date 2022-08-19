@@ -55,11 +55,12 @@ function Get-PropertyEnumerator {
     }
 }
 
+if ($false) {
+    , (Get-Item .) | Get-PropertyEnumerator
+    # | Get-Random -Count 3
 
-, (Get-Item .) | Get-PropertyEnumerator
-# | Get-Random -Count 3
-
-, (Get-Item .) | Get-PropertyEnumerator -Options @{
-    SortPropertyNames = $false
+    , (Get-Item .) | Get-PropertyEnumerator -Options @{
+        SortPropertyNames = $false
+    }
+    # | Get-Random -Count 3
 }
-# | Get-Random -Count 3

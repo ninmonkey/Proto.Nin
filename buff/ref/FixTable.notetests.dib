@@ -1,0 +1,44 @@
+#!pwsh
+
+(ls -path '..').count
+$final = (ls -path '..') | select -first 10
+
+#!pwsh
+
+$res = $final | ft -auto
+
+#!pwsh
+
+#!time
+0..10000 | Join-String 
+#!share --from pwsh 
+#!time
+
+#!pwsh
+
+Find-Type *pivot*
+
+#!pwsh
+
+#!share
+
+#!pwsh
+
+#!mermaid
+graph TD;
+    A-->B;
+    A-->C;
+    B-->D;
+    C-->D;
+
+#!pwsh
+
+#
+
+
+$mapping = foreach($f in @(ls .)) {
+    $dict ??= @{ 'Parent' = @() }
+    $dict.Parent += $dict.name
+}
+$mapping
+$dict

@@ -70,9 +70,18 @@ class EncodedTextResult {
     # not written to be performant, but useful
 
     [ValidateNotNull()][string]$RawOriginal = [String]::Empty
-    [byte[]]$EncodedText = @()
     [string]$EncodingName = 'utf-8' # should be a Encoder getter
     [Text.Encoding]$Encoder
+
+    [int]$ByteCount
+    [int]$ByteCount_AsUtf8
+    [int]$ByteCount_AsUnicode
+    [int]$ByteCount_Ascii
+
+    [byte[]]$EncodedText = @()
+    [byte[]]$EncodedText_AsUtf8 = @()
+    [byte[]]$EncodedText_AsUnicode = @()
+    [byte[]]$EncodedText_AsAscii = @()
 
     # alias HighlightedDisplayString
     [ValidateNotNull()][string]$HighlightedDisplayString = [String]::Empty
@@ -84,29 +93,13 @@ class EncodedTextResult {
     [bool]$WasBlank
     [bool]$WasWhiteSpace
 
-    [int]$ByteCount
     # [bool]$WasControlChars // regex Cc?
-
-    [int]$ByteCount_AsUtf8
-    [int]$ByteCount_AsUnicode
-    [int]$ByteCount_Ascii
-
-    [byte[]]$EncodedText_AsUtf8
-    [byte[]]$EncodedText_AsUnicode
-    [byte[]]$EncodedText_AsAscii
 
 
     # future: make encoding optional
     # EncodedTextResult ( [string]$InputString, [String]$EncodingName ) {
 
-    EncodedTextResult ( [string]$InputString, [object]$Encoding ) {
-        newEncoding utf-8
-        newEncoding unicode
-        newEncoding ascii
-
-        [int]$ByteCount_AsUtf8
-        [int]$ByteCount_AsUnicode
-        [int]$ByteCount_Ascii
+    EncodedTextResult ( [string]$InputString ) {
 
         if ($null -eq $InputString) {
             throw 'Required string was missing'
@@ -114,13 +107,24 @@ class EncodedTextResult {
         if ($InputString.length -eq 0) {
             throw 'String is empty!'
         }
-        if ($Encoding -is 'System.Text.Encoding') {
-            $this.Encoder = $Encoding
-            Write-Debug "As Encoder: $Encoding"
-        } else {
-            $this.Encoder = newEncoding $Encoding
-            Write-Debug "As String -> NewEncoding: $Encoding"
-        }
+        # if ($Encoding -is 'System.Text.Encoding') {
+        #     $this.Encoder = $Encoding
+        #     Write-Debug "As Encoder: $Encoding"
+        # } else {
+        #     $this.Encoder = newEncoding $Encoding
+        #     Write-Debug "As String -> NewEncoding: $Encoding"
+        # }
+        $this.EncodedText = (newEncoding 'utf-8').GetBytes( $InputString )
+        $this.EncodedText_AsUtf8 = (newEncoding 'utf-8').GetBytes( $InputString )
+        $this.EncodedText_AsUnicode = (newEncoding 'unicode').GetBytes( $InputString )
+        $this.EncodedText_AsAscii = (newEncoding 'ascii').GetBytes( $InputString )
+        $this.Encoder = newEncoding 'utf-8'
+
+        $this.ByteCount_AsUtf8 = $this.EncodedText.Length
+        $this.ByteCount = $this.ByteCount_AsUtf8
+        $this.ByteCount_AsUnicode = $this.EncodedText_AsUnicode.Length
+        $this.ByteCount_Ascii = $this.EncodedText_AsAscii.Length
+
 
         $r = 255 * .8
         $ColorGrayBG = $script:PSStyle.Background.FromRgb( $r, $r, $r)
@@ -165,8 +169,9 @@ hr
 $newEnc = newEncoding unicode
 $results = $Samples.Values | ForEach-Object {
     $cur = $_
-    [EncodedTextResult]::new( $cur, 'utf-8' )
-    [EncodedTextResult]::new( $cur, $newEnc )
+    [EncodedTextResult]::new( $cur  )
+    # [EncodedTextResult]::new( $cur , 'utf-8' )
+    # [EncodedTextResult]::new( $cur , $newEnc )
 }
 
 $results

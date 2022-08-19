@@ -33,9 +33,7 @@ class StringToFileInfoTransformationAttribute : ArgumentTransformationAttribute 
 
         return $File
     }
-
 }
-
 function Test-Transform {
     param(
         [StringToFileInfoTransformationAttribute()]
@@ -45,17 +43,16 @@ function Test-Transform {
     $filepath
 }
 
+
 Test-Transform 'temp:\fake.log'
 
 Hr -fg magenta
-'hi' | sc temp:\fake.log
+'hi' | Sc temp:\fake.log
 $PathAsText = 'temp:\fake.log'
 $maybeItem = [StringToFileInfoTransformationAttribute()]$PathAsText
 Hr -fg pink
 $maybeItem | shortType
 $maybeItem
-
-
 
 class ResolvedFileInfo : Attribute {
     <#
@@ -129,8 +126,6 @@ function testIt {
         param_ErrorIfMissing       = $ErrorIfMissingPath
     }
     # ErrorIfMissingPath = '?' #$ErrorIfMissingPath
-
-
     # AllowCreatePath    = '?' #$AllowCreatePath
 
     $null = 'no-op'

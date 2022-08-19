@@ -33,6 +33,24 @@ $Conf = @{
 
 Get-Content $COnf.LogPath
 
+Write-Warning '
+    two attrs
+        [1] nyi, die if invoked
+        [2] exclusive parametersets
+'
+
+class NotImplementedParameter : Attribute {
+    <#
+    .synopsis
+    sf
+    .DESCRIPTION
+    intro on custom attributes:
+        https://powershellexplained.com/2017-02-19-Powershell-custom-attribute-validator-transform/
+        https://powershellexplained.com/2017-02-20-Powershell-creating-parameter-validators-and-transforms/
+    #>
+    [string]$Reason = [string]::Empty
+    [bool]$AllowIgnore # IsNotFatal
+}
 function Invoke-SSMS {
     <#
     .SYNOPSIS
@@ -46,6 +64,11 @@ function Invoke-SSMS {
     [Alias('SSMS')]
     [cmdletbinding()]
     param(
+        [NotImplementedParameter(Reason = 'sdf', AllowIgnore)]
+        [Parameter()]
+        [string]$ScriptFile,
+
+
         # for [ -S servername ]
         [Parameter(Mandatory, Position = 0)]
         [ArgumentCompletions('localhost:1234', 'NIN8\SQL2019')]
@@ -57,11 +80,15 @@ function Invoke-SSMS {
         [ArgumentCompletions('SQL2019', 'master')]
         [string]$DatabaseName,
 
-        # for [ -d databasename ], aka instance name?
-        [Alias('U')]
-        [Parameter(Mandatory, Position = 1)]
+        # for [ -U username ], aka instance name?
+        [Alias('UserSQL')]
         [ArgumentCompletions('nin8\cppmo_000')]
-        [string]$WindowsAuth,
+        [string]$SQLAuthUsername,
+
+        # for [ -E ] windows implicit auth
+        [Alias('U')]
+        #
+        [switch]$WindowsAuth,
 
 
         # [Parameter()]
@@ -112,7 +139,7 @@ $cmdArgs = @(
     $LogPath
 )
 
-Invoke-SSMS -Test -ServerName 'NIN8\SQL2019' -DatabaseName 'SQL2019' -WindowsAuth 'nin8\cppmo_000'
+Invoke-SSMS -Test -ServerName 'NIN8\SQL2019' -DatabaseName 'SQL2019' -WindowsAuth -SQLAuthUsername 'nin8\cppmo_000'
 # $cmdArgs = @(
 #     if($Conf.ServerName) {
 #         '-S'

@@ -4,7 +4,7 @@ function UnEscapeHtmlEntity {
     .synopsis
         un-escaped already escaped html entities
     .example
-        Pwsh> 'Hi &quot;world&quot;'  | Html->UnEscapeEntity
+        Pwsh> 'Hi &quot;world&quot;'  | UnEscapeHtmlEntity
         Hi "world"
     .notes
         see also:

@@ -21,6 +21,9 @@ function _pinfo {
         [Parameter(Mandatory, position = 1)]
         [string[]]$ParameterName = @('detailed', 'full')
     )
+    Write-Warning 'because of exploration/featurecreep, parma info i sreturned as 3 arrays redunancy
+        filtered attrs are already on [].parameters , then all are on paramAttributes
+    '
     $ParameterName | ForEach-Object {
         $ParameterName = $_;
         Write-ConsoleHeader $CommandName | Write-Information
@@ -78,6 +81,8 @@ function _pinfo {
 
 $Pinfo = _pinfo 'Get-Help' 'Detailed', 'Full', 'example'
 $Pinfo | Format-List
+
+# $Pinfo = _pinfo 'Get-Help' 'Detailed', 'Full', 'example' ; $Pinfo | fl
 
 # (Get-Command Get-Help).Parameters[$name]
 # | Add-Member -NotePropertyName 'Command' -NotePropertyValue $Name -PassThru
