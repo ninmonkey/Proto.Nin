@@ -1,9 +1,14 @@
 #Requires -Version 7
 
 <#
-                _getEncodings.proto | generates [encodingInfo[]]
+2022-10-19: to save/merge/module
+                _getEncodings.proto | generates [e ncodingInfo[]]
                 Get-TextEncoding    | User entry point
     _getEncodingsCompletionResult   | generate autocompletions for some completer
+
+    see also
+    [Jborean encoding from Gets extended attributes for a file on an NTFS volume](https://gist.github.com/jborean93/50a517a8105338b28256ff0ea27ab2c8#file-get-extendedattribute-ps1-L4)
+    <C:\Users\cppmo_000\SkyDrive\Documents\2022\Pwsh\my_Github\proto.nin\src\text\Resolve-TextEncoding.ps1>
 
 see also:
     https://docs.microsoft.com/en-us/dotnet/api/system.text.encoding.getmaxbytecount?view=net-6.0#remarks

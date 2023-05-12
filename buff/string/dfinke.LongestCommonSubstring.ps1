@@ -13,10 +13,12 @@
 
 #>
 
+'todo: first'
+
 function longestCommonSubstring([string]$s1, [string]$s2) {
     # Init the matrix of all substring lengths to use Dynamic Programming approach.
 
-    $substringMatrix = (0..($s2.Length + 1)).ForEach( {New-Object object[] ($s1.Length + 1)} )
+    $substringMatrix = (0..($s2.Length + 1)).ForEach( { New-Object object[] ($s1.Length + 1) } )
 
 
     # Fill the first row and first column with zeros to provide initial values.

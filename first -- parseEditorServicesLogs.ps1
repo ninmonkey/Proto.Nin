@@ -1,5 +1,5 @@
 $Regex = @{}
- New-ADUser -name $gebruiker -DisplayName $Gebruiker -GivenName 'dsfsd'
+#  New-ADUser -name $gebruiker -DisplayName $Gebruiker -GivenName 'dsfsd'
 
 
 # $sess = @'
@@ -7,6 +7,26 @@ $Regex = @{}
 # '@ | from->Json
 # Get-Item $sess.languageServicePipeName
 
+
+$bin7z = gcm -CommandType Application '7z' | s -first 1
+$args7z = @(
+    'i'
+)
+
+& $bin7z @args7z | %{
+    $row = $_
+    $_ -replace '\s{2,}', '🙊' -replace '\s+', '🐱' -replace '\d+', {
+        $PSStyle.Background.Green()
+    }
+
+    # "Item: $row"
+}
+#  | cl
+# (7z i) -split '\r?\n' | %{
+
+
+
+return
 $Named = @{
     MaybeConf   = Get-Item -ea ignore 'c:\Users\cppmo_000\AppData\Roaming\Code\User\globalStorage\ms-vscode.powershell-preview\sessions\PSES-VSCode-37080-273303.json'
     Pipe1       = Get-Item -ea ignore '\\.\pipe\PSES_ivsz0u0s.v2g'
@@ -25,6 +45,7 @@ view log using:
     PS> gc $curLog | bat -l json
 #>
 # $error.Clear()
+
 
 
 function _find-newestEditorServicesLog {

@@ -42,7 +42,9 @@ function Get-TypeInformationInteractive {
             # newer
             'ImplementedInterfaces_AsUL',
             'Expand_Default_ImplementedInterfaces',
-            'Expand_Table_ImplementedInterfaces_NoGroup'
+            'Expand_Table_ImplementedInterfaces_NoGroup',
+            'Table_Default_DeclaredProperties',
+            'Table_Default_DeclaredMembers'
         )]
         [string]$FormatMode,
 
@@ -55,9 +57,12 @@ function Get-TypeInformationInteractive {
         } elseif ($InputObject -is 'string') {
             $tinfo = $InputObject -as 'type'
         } else {
-            $InputObject.GetType()
+            $tinfo = $InputObject.GetType()
         }
 
+        # if ($null -eq $tinfo) {
+        #     throw 'error, null input'
+        # }
         $firstElem = @($InputObject)[0]?.GetType()
         $firstTinfo = $firstElem
 
@@ -69,7 +74,7 @@ function Get-TypeInformationInteractive {
         if ($Label) {
             H1 -Name $Label
         } else {
-            H1 -Name ($Tinfo | shortType)
+            H1 -Name $($Tinfo | shortType)
         }
 
         Label 'TypeName' ($Tinfo | shortType)
@@ -110,6 +115,12 @@ function Get-TypeInformationInteractive {
             }
             'Expand_Table_ImplementedInterfaces_NoGroup' {
                 $tinfo.ImplementedInterfaces | Format-Table -GroupBy { $true } -AutoSize
+            }
+            'Table_Default_DeclaredMembers' {
+                $tinfo.DeclaredMembers | Format-Table -AutoSize
+            }
+            'Table_Default_DeclaredProperties' {
+                $tinfo.DeclaredProperties | Format-Table -AutoSize
             }
             default { throw "ShouldNeverReach:$FormatMode  $_ " }
         }
